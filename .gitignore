@@ -1,0 +1,8 @@
+# Ignore binary files
+*.o
+*.pyc
+*.pyo
+C/bin/*
+
+# Keep bin directory
+!C/bin/.gitkeep
