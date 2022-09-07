@@ -37,4 +37,4 @@ t2 = time.time()
 print(niter, t2-t1)
 
 # Plot
-plot(phi,1,1)
+plot(phi)

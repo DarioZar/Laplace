@@ -74,5 +74,6 @@ elif rank == size-1:
 else:
     comm.Send(local_phi[1:-1,:], dest=0)
 
+# Plot
 if rank == 0:
-    plot(phi,1,1)
+    plot(phi)

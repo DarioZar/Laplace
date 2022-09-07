@@ -32,7 +32,7 @@ C
 
     Example:
     ```bash
-    ./bin/laplace_seq 0 100 100 1e-6
+    ./bin/laplace_seq 0 128 128 1e-6
     ```
 2. Run the parallel version using
     ```bash
@@ -43,7 +43,7 @@ C
 
     Example:
     ```bash
-    mpirun -np 4 ./bin/laplace_mpi 0 100 100 1e-6
+    mpirun -np 4 ./bin/laplace_mpi 0 128 128 1e-6
     ```
 3. The command returns number of iterations and time needed for convergence. The data is in `laplace.dat` and can be plotted using (requires numpy, matplotlib)
     ```bash
@@ -54,7 +54,7 @@ C
 The python version contains a sequential and a parallel version (using `mpi4py`).
 
 ### How to use
-0. Install all requirements (numpy, mpi4py, matplotlib)
+0. Install all requirements (numpy, mpi4py, matplotlib, numba)
     ```bash
     cd python
     pip install -r requirements.txt
@@ -73,7 +73,7 @@ The python version contains a sequential and a parallel version (using `mpi4py`)
 
     Example:
     ```bash
-    python laplace_seq.py jacobi_vec 100 100 1e-6
+    python laplace_seq.py jacobi_vec 128 128 1e-6
     ```
 2. Run the parallel version using
     ```bash
@@ -84,6 +84,15 @@ The python version contains a sequential and a parallel version (using `mpi4py`)
 
     Example:
     ```bash
-    mpirun -np 4 python laplace_mpi.py jacobi_vec 100 100 1e-6
+    mpirun -np 4 python laplace_mpi.py jacobi_vec 128 128 1e-6
+    ```
+2. Run the numba version using
+    ```bash
+    python laplace_numba.py NX NY TOLERANCE
+    ```
+
+    Example:
+    ```bash
+    python laplace_numba.py 128 128 1e-6
     ```
 3. The command returns number of iterations, time needed for convergence and plots the solution.
