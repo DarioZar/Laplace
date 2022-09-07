@@ -6,3 +6,6 @@ C/bin/*
 
 # Keep bin directory
 !C/bin/.gitkeep
+
+# Ignore ipython notebook checkpoints
+.ipynb_checkpoints
