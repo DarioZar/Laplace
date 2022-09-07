@@ -51,11 +51,11 @@ niter=0
 t1 = time.time()
 while delta>target:
     if rank>0:
-        comm.Send(local_phi[1,:], dest=rank-1, tag=11)
-        comm.Recv(local_phi[0,:], source=rank-1, tag=22)
+        comm.Sendrecv(sendbuf=local_phi[1,:], dest=rank-1, sendtag=11,
+                      recvbuf=local_phi[0,:], source=rank-1, recvtag=22)
     if rank<size-1:
-        comm.Send(local_phi[-2,:], dest=rank+1, tag=22)
-        comm.Recv(local_phi[-1,:], source=rank+1, tag=11)
+        comm.Sendrecv(sendbuf=local_phi[-2,:], dest=rank+1, sendtag=22,
+                      recvbuf=local_phi[-1,:], source=rank+1, recvtag=11)
     delta = fun_solve(local_phi)
     delta = comm.allreduce(delta, op=MPI.MAX)
     niter += 1

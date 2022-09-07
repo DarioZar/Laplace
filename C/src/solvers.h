@@ -10,5 +10,5 @@
 
 #include <stdio.h>
 
-double solve_laplace(size_t x, size_t y, double[x][y]);
-double gs_solve_laplace(size_t x, size_t y, double[x][y]);
+double solve_laplace(size_t x, size_t y, double(*)[y]);
+double gs_solve_laplace(size_t x, size_t y, double(*)[y]);

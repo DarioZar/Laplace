@@ -9,6 +9,6 @@
 
 #include <stdio.h>
 
-void init2dArray(size_t x, size_t y, double[x][y], double);
-void print2dArray(size_t x, size_t y, double[x][y]);
-void save2dArray(size_t x, size_t y, double[x][y], char*);
+void init2dArray(size_t x, size_t y, double(*)[y], double);
+void print2dArray(size_t x, size_t y, double(*)[y]);
+void save2dArray(size_t x, size_t y, double(*)[y], char*);

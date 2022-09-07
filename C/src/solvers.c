@@ -9,6 +9,7 @@
  */
 
 #include <math.h>
+#include <stdlib.h>
 #include "solvers.h"
 
 /**
@@ -16,14 +17,14 @@
  * 
  * @param x number of rows
  * @param y number of columns
- * @param array 2D array
+ * @param phi 2D array
  * @return double maximum error
  */
-double gs_solve_laplace(size_t x, size_t y, double phi[x][y]){
-    int i,j;
+double gs_solve_laplace(size_t x, size_t y, double (*phi)[y]){
+    size_t i,j;
     double diff, maxdiff;
     // Save old array
-    double phi_0[x][y];
+    double (*phi_0)[y] = malloc(sizeof(double[x][y]));
     for(i=0;i<x;i++){
         for(j=0;j<y;j++){
             phi_0[i][j] = phi[i][j];
@@ -43,6 +44,7 @@ double gs_solve_laplace(size_t x, size_t y, double phi[x][y]){
             if(diff>maxdiff) maxdiff = diff;
         }
     }
+    free(phi_0);
     return maxdiff;
 }
 
@@ -51,13 +53,13 @@ double gs_solve_laplace(size_t x, size_t y, double phi[x][y]){
  * 
  * @param x number of rows
  * @param y number of columns
- * @param array 2D array
+ * @param phi 2D array
  * @return double maximum error
  */
-double solve_laplace(size_t x, size_t y, double phi[x][y]){
-    int i,j;
+double solve_laplace(size_t x, size_t y, double (*phi)[y]){
+    size_t i,j;
     double diff, maxdiff;
-    double phi_new[x][y];
+    double (*phi_new)[y] = malloc(sizeof(double[x][y]));
     // Update points
     for(i=1;i<x-1;i++){
         for(j=1;j<y-1;j++){
@@ -73,5 +75,6 @@ double solve_laplace(size_t x, size_t y, double phi[x][y]){
             phi[i][j] = phi_new[i][j];
         }
     }
+    free(phi_new);
     return maxdiff;
 }

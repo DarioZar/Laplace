@@ -12,12 +12,12 @@
 #include "solvers.h"
 
 int main(int argc, char *argv[]) {
-    int rank, size, method;
-    int Nx, Ny, i,j;
+    int method;
+    int Nx, Ny, i;
     double target;
 
     // Pointer to solver function
-    double (*fun_solve)(size_t x, size_t y, double[x][y]);
+    double (*fun_solve)(size_t x, size_t y, double(*)[y]);
 
     // Command line arguments
     method = atoi(argv[1]);
@@ -27,7 +27,7 @@ int main(int argc, char *argv[]) {
     target = atof(argv[4]);
 
     /*-- Global domain init --*/
-    double phi[Nx][Ny];
+    double (*phi)[Ny] = malloc(sizeof(double[Nx][Ny]));
     double V = 10;
     init2dArray(Nx, Ny, phi, 0.0);
     // Boundary conditions
@@ -49,6 +49,9 @@ int main(int argc, char *argv[]) {
 
     // Save results
     save2dArray(Nx, Ny, phi, "laplace.dat");
+
+    // Free array
+    free(phi);
 
     return 0;
 }

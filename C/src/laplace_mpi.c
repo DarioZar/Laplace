@@ -14,11 +14,11 @@
 
 int main(int argc, char *argv[]) {
     int rank, size, method;
-    int Nx, Ny, i,j;
+    int Nx, Ny, i;
     double target;
 
     // Pointer to solver function
-    double (*fun_solve)(size_t x, size_t y, double[x][y]);
+    double (*fun_solve)(size_t x, size_t y, double(*)[y]);
 
     // Command line arguments
     method = atoi(argv[1]);
@@ -33,7 +33,7 @@ int main(int argc, char *argv[]) {
     MPI_Comm_size(MPI_COMM_WORLD, &size);
 
     /*-- Global domain init --*/
-    double phi[Nx][Ny];
+    double (*phi)[Ny] = malloc(sizeof(double[Nx][Ny]));
     double V = 10;
     if (rank == 0){
         init2dArray(Nx, Ny, phi, 0.0);
@@ -59,11 +59,10 @@ int main(int argc, char *argv[]) {
     int ny = Ny;
     int ni = (rank==0) ? 0 : 1;
     // 3. Initialize local domain
-    double local_phi[nx][ny];
+    double (*local_phi)[ny] = malloc(sizeof(double[nx][ny]));
     init2dArray(nx, ny, local_phi, 0.0);
     // 4. Scatter global domain to local domains
-    MPI_Scatterv(&phi, sendcounts, displs, MPI_DOUBLE, &local_phi[ni], sendcounts[rank], MPI_DOUBLE, 0, MPI_COMM_WORLD);
-
+    MPI_Scatterv(phi, sendcounts, displs, MPI_DOUBLE, local_phi[ni], sendcounts[rank], MPI_DOUBLE, 0, MPI_COMM_WORLD);
     /*-- Solver iterations --*/
     int n_iter = 0;
     double delta = 1.0;
@@ -71,12 +70,14 @@ int main(int argc, char *argv[]) {
     clock_t t1 = clock();
     while(delta>target){
         if(rank>0) {
-            MPI_Send(&local_phi[1], ny, MPI_DOUBLE, rank-1, 11, MPI_COMM_WORLD);
-            MPI_Recv(&local_phi[0], ny, MPI_DOUBLE, rank-1, 22, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            MPI_Sendrecv(local_phi[1], ny, MPI_DOUBLE, rank-1, 11,
+                         local_phi[0], ny, MPI_DOUBLE, rank-1, 22,
+                         MPI_COMM_WORLD, MPI_STATUS_IGNORE);
         }
         if(rank<size-1) {
-            MPI_Send(&local_phi[nx-2], ny, MPI_DOUBLE, rank+1, 22, MPI_COMM_WORLD);
-            MPI_Recv(&local_phi[nx-1], ny, MPI_DOUBLE, rank+1, 11, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            MPI_Sendrecv(local_phi[nx-2], ny, MPI_DOUBLE, rank+1, 22,
+                         local_phi[nx-1], ny, MPI_DOUBLE, rank+1, 11,
+                         MPI_COMM_WORLD, MPI_STATUS_IGNORE);
         }
         local_delta = (*fun_solve)(nx, ny, local_phi);
         n_iter++;
@@ -84,14 +85,17 @@ int main(int argc, char *argv[]) {
     }
     clock_t t2 = clock();
     if (rank == 0){
-        printf("%d iterations, %f seconds", n_iter, (float)(t2-t1)/CLOCKS_PER_SEC);
+        printf("%d iterations, %f seconds\n", n_iter, (float)(t2-t1)/CLOCKS_PER_SEC);
     }
 
-    // Gather and save results
-    MPI_Gatherv(&local_phi[ni], sendcounts[rank], MPI_DOUBLE, &phi, sendcounts, displs, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+    // Gather results and free memory
+    MPI_Gatherv(local_phi[ni], sendcounts[rank], MPI_DOUBLE, phi, sendcounts, displs, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+    free(local_phi);
+    // Save results to file and free memory
     if (rank == 0){
         save2dArray(Nx, Ny, phi, "laplace.dat");
     }
+    free(phi);
 
     MPI_Finalize();
     return 0;
